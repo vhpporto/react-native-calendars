@@ -16,8 +16,8 @@ export const textMonthFontFamily = 'System';
 export const textDayHeaderFontFamily = 'System';
 export const todayButtonFontFamily = 'System';
 
-export const textDayFontWeight = '300';
-export const textMonthFontWeight = '300';
+export const textDayFontWeight = '500';
+export const textMonthFontWeight = '500';
 export const textDayHeaderFontWeight = undefined;
 export const todayButtonFontWeight = '600';
 

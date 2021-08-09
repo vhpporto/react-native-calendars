@@ -3,9 +3,10 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
 import React from 'react';
-import {View, Text, ScrollView, TouchableOpacity, Dimensions} from 'react-native';
+import {Alert, View, Text, ScrollView, TouchableOpacity, Dimensions} from 'react-native';
 import styleConstructor from './style';
 import populateEvents from './Packer';
+import moment from 'moment' 
 
 const LEFT_MARGIN = 60 - 1;
 const TEXT_LINE_HEIGHT = 17;
@@ -27,10 +28,13 @@ export default class Timeline extends React.PureComponent {
         start: PropTypes.string.isRequired,
         end: PropTypes.string.isRequired,
         title: PropTypes.string.isRequired,
-        summary: PropTypes.string.isRequired,
-        color: PropTypes.string
+        // summary: PropTypes.strinyarn g.isRequired,
+        color: PropTypes.string,
       })
-    ).isRequired
+      ).isRequired,
+      scrollToNow: PropTypes.bool,
+      currentDateString: PropTypes.string,
+      updateCurrentTimeIndicatorEveryMinute: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -72,8 +76,89 @@ export default class Timeline extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.props.scrollToFirst && this.scrollToFirst();
+    if (this.isCurrentDateStringForTimeIndicatorSet()) {
+      this.setState({
+        currentTimeIndicatorTopCoordinate: this.currentTimeOffset()
+      });
+
+      if (this.props.updateCurrentTimeIndicatorEveryMinute) {
+        this.interval = setInterval(() => {
+          this.setState({
+            currentTimeIndicatorTopCoordinate: this.currentTimeOffset()
+          });
+        }, 6000);
+      }
+    }
+
+    if (this.props.scrollToFirst) {
+      this.scrollToFirst();
+    } else if (this.props.scrollToNow) {
+      this.scrollToNow();
+    }
   }
+
+  componentWillUnmount() {
+    if (this.props.updateCurrentTimeIndicatorEveryMinute) {
+      clearInterval(this.interval);
+    }
+  }
+
+  scrollToNow() {
+    setTimeout(() => {
+      if (this._scrollView) {
+        this._scrollView.scrollTo({
+          x: 0,
+          y: this.currentTimeOffset(),
+          animated: true,
+        });
+      }
+    }, 1);
+  }
+
+  currentTimeOffset() {
+    const offset = 100;
+    const {start = 0} = this.props;
+    const timeNowHour = moment().hour();
+    const timeNowMin = moment().minutes();
+
+    return offset * (timeNowHour - start) + (offset * timeNowMin) / 60;
+  }
+
+  isCurrentDateStringForTimeIndicatorSet () {
+    return typeof this.props.currentDateString !== 'undefined';
+  }
+
+  _renderCurrentTimeIndicator() {
+    if (this.isCurrentDateStringForTimeIndicatorSet() &&
+      this.props.currentDateString === moment().format('YYYY-MM-DD')) {
+      // currentDateString format YYYY-MM-DD, e.g. 2020-11-06
+      // Time indicator should be displayed only on the current date
+      return (
+        <View style={{flexDirection: 'row'}}>
+          <View style={{ marginTop: -10,  top: this.state.currentTimeIndicatorTopCoordinate,
+             height: 20, width: 40, backgroundColor: 'red', borderRadius: 7, marginLeft: 10, alignItems: 'center', justifyContent: 'center'}}>
+              <Text style={{ color: 'white', fontSize: 10}}>{moment(new Date()).format('hh:mm')}</Text>
+          </View>
+
+        <View
+          key={'timeNow'}
+          style={[
+            this.style.lineNow,
+            {
+              top: this.state.currentTimeIndicatorTopCoordinate,
+              width: dimensionWidth - 20,
+            },
+          ]}
+          />
+          </View>
+      );
+    }
+  }
+
+  
+
+
+
 
   scrollToFirst() {
     setTimeout(() => {
@@ -112,22 +197,43 @@ export default class Timeline extends React.PureComponent {
           {timeText}
         </Text>,
         i === start ? null : (
-          <View key={`line${i}`} style={[this.style.line, {top: offset * index, width: dimensionWidth - EVENT_DIFF}]} />
+          <TouchableOpacity onLongPress={() => this.props.toggleModal(i * 60)} key={`line${i}`} style={[this.style.line , { borderBottomColor: '#bbb' ,borderBottomWidth: 0.5, backgroundColor: 'white', height: 50} , {top: offset * index, width: dimensionWidth - EVENT_DIFF}]} />
         ),
-        <View
+        <TouchableOpacity onLongPress={() => this.props.toggleModal(i * 60 + 30)}
           key={`lineHalf${i}`}
-          style={[this.style.line, {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF}]}
-        />
+          style={[this.style.line, { borderBottomColor: '#bbb', borderBottomWidth: 0.5,  backgroundColor: 'transparent' ,height: 50} , {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF}]}
+        />,
       ];
     });
   }
 
   _onEventTapped(event) {
+    if (event.title === 'SEM JORNADA') return
+
     if (this.props.eventTapped) {
       this.props.eventTapped(event);
     }
+    this.props.abrirDetalhesAgendamento(JSON.stringify(event))
   }
 
+  colorShade = (col, amt) => {
+    col = col.replace(/^#/, '')
+    if (col.length === 3) col = col[0] + col[0] + col[1] + col[1] + col[2] + col[2]
+  
+    let [r, g, b] = col.match(/.{2}/g);
+    ([r, g, b] = [parseInt(r, 16) + amt, parseInt(g, 16) + amt, parseInt(b, 16) + amt])
+  
+    r = Math.max(Math.min(255, r), 0).toString(16)
+    g = Math.max(Math.min(255, g), 0).toString(16)
+    b = Math.max(Math.min(255, b), 0).toString(16)
+  
+    const rr = (r.length < 2 ? '0' : '') + r
+    const gg = (g.length < 2 ? '0' : '') + g
+    const bb = (b.length < 2 ? '0' : '') + b
+  
+    return `#${rr}${gg}${bb}`
+  }
+  
   _renderEvents() {
     const {packedEvents} = this.state;
     let events = packedEvents.map((event, i) => {
@@ -136,7 +242,10 @@ export default class Timeline extends React.PureComponent {
         height: event.height,
         width: event.width,
         top: event.top,
-        backgroundColor: event.color ? event.color : '#add8e6'
+        borderLeftWidth: 2,
+        // borderLeftColor: this.colorShade(event.color || '#bfe0ff', -70),
+        // backgroundColor: '#f8d1ff'
+        backgroundColor: event.color ? event.color  : '#bfe0ff'
       };
 
       // Fixing the number of lines for the event title makes this calculation easier.
@@ -155,19 +264,24 @@ export default class Timeline extends React.PureComponent {
             this.props.renderEvent(event)
           ) : (
             <View>
-              <Text numberOfLines={1} style={this.style.eventTitle}>
-                {event.title || 'Event'}
-              </Text>
+              {event.title !== 'SEM JORNADA' && 
+                <Text numberOfLines={1} style={this.style.eventTitle}>
+                  {event.servico || 'Event'} -  {event.usuario}
+                </Text>
+              }
               {numberOfLines > 1 ? (
                 <Text numberOfLines={numberOfLines - 1} style={[this.style.eventSummary]}>
-                  {event.summary || ' '}
+                  {event.obs || ' '}
                 </Text>
               ) : null}
-              {numberOfLines > 2 ? (
-                <Text style={this.style.eventTimes} numberOfLines={1}>
-                  {XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}
-                </Text>
-              ) : null}
+              {event.title !== 'SEM JORNADA' && (
+                numberOfLines > 2 ? (
+                  <Text style={this.style.eventTimes} numberOfLines={1}>
+                    {XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}
+                  </Text>
+                ) : null
+              ) }
+              
             </View>
           )}
         </TouchableOpacity>
@@ -189,6 +303,7 @@ export default class Timeline extends React.PureComponent {
       >
         {this._renderLines()}
         {this._renderEvents()}
+        {this._renderCurrentTimeIndicator()}
       </ScrollView>
     );
   }

@@ -3,7 +3,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
 import React from 'react';
-import {Alert, View, Text, ScrollView, TouchableOpacity, Dimensions} from 'react-native';
+import {Alert, View, Text, ScrollView, TouchableOpacity, Dimensions, EventSubscriptionVendor} from 'react-native';
 import styleConstructor from './style';
 import populateEvents from './Packer';
 import moment from 'moment' 
@@ -156,10 +156,6 @@ export default class Timeline extends React.PureComponent {
   }
 
   
-
-
-
-
   scrollToFirst() {
     setTimeout(() => {
       if (this.state && this.state._scrollY && this._scrollView) {
@@ -172,10 +168,14 @@ export default class Timeline extends React.PureComponent {
     }, 1);
   }
 
+
   _renderLines() {
     const {format24h, start = 0, end = 24} = this.props;
     const offset = this.calendarHeight / (end - start);
     const EVENT_DIFF = 20;
+    const tamanhoRow15Min = 25;
+    const tamanhoRow20Min = 33;
+
 
     return range(start, end + 1).map((i, index) => {
       let timeText;
@@ -192,23 +192,109 @@ export default class Timeline extends React.PureComponent {
         timeText = !format24h ? `${i - 12} PM` : `${i}:00`;
       }
 
+
+      if (this.props.paramTempoAgenda === '15') {
       return [
         <Text key={`timeLabel${i}`} style={[this.style.timeLabel, {top: offset * index - 6}]}>
           {timeText}
         </Text>,
         i === start ? null : (
-          <TouchableOpacity onLongPress={() => this.props.toggleModal(i * 60)} key={`line${i}`} style={[this.style.line , { borderBottomColor: '#bbb' ,borderBottomWidth: 0.5, backgroundColor: 'white', height: 50} , {top: offset * index, width: dimensionWidth - EVENT_DIFF}]} />
+          <View key={`bt1line${i}`} >
+            <TouchableOpacity
+             onPress={() => { this.props.toggleModal(i * 60)}}
+             style={[
+               this.style.line, 
+               { top: offset * index, width: dimensionWidth - EVENT_DIFF}]}
+              />
+            <TouchableOpacity 
+              onPress={() => { this.props.toggleModal(i * 60 + 15)}}
+              style={[this.style.line , { height: 25} ,
+              { top: offset * index + 25, width: dimensionWidth - EVENT_DIFF}]} />
+          </View>
         ),
-        <TouchableOpacity onLongPress={() => this.props.toggleModal(i * 60 + 30)}
-          key={`lineHalf${i}`}
-          style={[this.style.line, { borderBottomColor: '#bbb', borderBottomWidth: 0.5,  backgroundColor: 'transparent' ,height: 50} , {top: offset * (index + 0.5), width: dimensionWidth - EVENT_DIFF}]}
-        />,
+        ,
+        <Text key={`2timeLabel${i}`} style={[this.style.timeLabel, {top: offset * index - 6}]}>
+        {timeText}
+      </Text>,
+        <View key={`linehalf${i}`}>
+          <TouchableOpacity 
+            onPress={() => this.props.toggleModal(i * 60 + 30)}
+            style={[
+              this.style.line,
+               {top: offset * index + 50, width: dimensionWidth - EVENT_DIFF}]}
+          />
+          <TouchableOpacity 
+            onPress={() => this.props.toggleModal(i * 60 + 45)}
+            style={[
+              this.style.line,
+              {top: offset * index + 75, width: dimensionWidth - EVENT_DIFF}]}
+          />
+        </View>
       ];
+    } else {
+      return [
+        <Text key={`timeLabel${i}`} style={[this.style.timeLabel, {top: offset * index - 6}]}>
+          {timeText}
+        </Text>,
+        i === start ? null : (
+          <View key={`bt1line${i}`} >
+            <TouchableOpacity
+             onLongPress={() => { this.props.toggleModal(i * 60)}}
+             style={[
+               this.style.line, 
+               {height: 33, top: offset * index, width: dimensionWidth - EVENT_DIFF}]}
+              />
+            <TouchableOpacity 
+              onLongPress={() => { this.props.toggleModal(i * 60 + 20)}}
+              style={[this.style.line,
+              {height: 33, top: offset * index + 33, width: dimensionWidth - EVENT_DIFF}]} />
+          </View>
+        ),
+        ,
+        <Text key={`2timeLabel${i}`} style={[this.style.timeLabel, {top: offset * index - 6}]}>
+        {timeText}
+      </Text>,
+        <View key={`linehalf${i}`}>
+          <TouchableOpacity 
+            onLongPress={() => this.props.toggleModal(i * 60 + 40)}
+            style={[
+              this.style.line,
+               {height: 34, top: offset * index + 66, width: dimensionWidth - EVENT_DIFF}]}
+          />
+        </View>
+      ];
+    }
     });
   }
 
+  renderAlert(title, subtitle,id) {
+    return Alert.alert(title, subtitle, [
+      {
+        text: 'Não',
+      },
+      { 
+        text: 'Sim',
+        onPress: () => this.props.desbloquearHorario(id)
+      }
+    ])
+  }
+
   _onEventTapped(event) {
-    if (event.title === 'SEM JORNADA') return
+    if (event.status === 'Sem Jornada') return
+    if (event.status === 'Realizado') {
+      return this.renderAlert(
+        'Comanda finalizada',
+        'Deseja reabrir este agendamento ?',
+        event.id
+      )
+    }
+    if (event.status === 'Bloqueado') {
+      return this.renderAlert(
+        'Desbloquear horário',
+        'Tem certeza que deseja desbloquear este horário ?',
+        event.id
+      )
+    }
 
     if (this.props.eventTapped) {
       this.props.eventTapped(event);
@@ -264,23 +350,37 @@ export default class Timeline extends React.PureComponent {
             this.props.renderEvent(event)
           ) : (
             <View>
-              {event.title !== 'SEM JORNADA' && 
+              {event.status === 'Bloqueado' && (
                 <Text numberOfLines={1} style={this.style.eventTitle}>
-                  {event.servico || 'Event'} -  {event.usuario}
-                </Text>
-              }
-              {numberOfLines > 1 ? (
-                <Text numberOfLines={numberOfLines - 1} style={[this.style.eventSummary]}>
-                  {event.obs || ' '}
-                </Text>
-              ) : null}
-              {event.title !== 'SEM JORNADA' && (
-                numberOfLines > 2 ? (
-                  <Text style={this.style.eventTimes} numberOfLines={1}>
-                    {XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}
-                  </Text>
-                ) : null
+                 Agenda bloqueada
+              </Text>
               ) }
+              {numberOfLines === 1 ? (
+               event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
+                <Text numberOfLines={1} style={this.style.eventTitle}>
+                  <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>{XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}</Text> {event.servico || ''} -  {event.usuario}
+                </Text>
+              ) : (
+
+                <Text numberOfLines={1} style={this.style.eventTitle}>
+                  <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>{XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}</Text> {event.servico || ''} -  {event.usuario}
+                </Text>
+              )}
+              {/* {event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
+                <Text numberOfLines={1} style={this.style.eventTitle}>
+                  <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>{XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}</Text> {event.servico || ''} -  {event.usuario}
+                </Text>
+              } */}
+              {/* {numberOfLines > 1 && event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' ? (
+                <>
+                  <Text numberOfLines={1} style={this.style.eventTitle}>
+                    <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>{XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}</Text>{event.servico || ''} -  {event.usuario}
+                  </Text>
+                  <Text numberOfLines={numberOfLines - 1} style={[this.style.eventSummary]}>
+                    {event.obs !== 'Agenda Bloqueada' && event.obs || ''}
+                  </Text>
+                </>
+              ) : null} */}
               
             </View>
           )}
@@ -299,8 +399,8 @@ export default class Timeline extends React.PureComponent {
     return (
       <ScrollView
         ref={ref => (this._scrollView = ref)}
-        contentContainerStyle={[this.style.contentStyle, {width: dimensionWidth}]}
-      >
+        contentContainerStyle={[this.style.contentStyle,
+        {width: dimensionWidth}]}>
         {this._renderLines()}
         {this._renderEvents()}
         {this._renderCurrentTimeIndicator()}

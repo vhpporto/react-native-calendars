@@ -211,12 +211,12 @@ export default class Timeline extends React.PureComponent {
              onPress={() => { this.props.toggleModal(i * 60)}}
              style={[
                this.style.line, 
-               {backgroundColor: 'green', top: offset * index, width: dimensionWidth - EVENT_DIFF}]}
+               {height: 25, top: offset * index, width: dimensionWidth - EVENT_DIFF}]}
               />
             <TouchableOpacity 
               onPress={() => { this.props.toggleModal(i * 60 + 15)}}
               style={[this.style.line , { height: 25} ,
-              { backgroundColor: 'blue',top: offset * index + 25, width: dimensionWidth - EVENT_DIFF}]} />
+              { top: offset * index + 25, width: dimensionWidth - EVENT_DIFF}]} />
           </>
         ),
         ,
@@ -226,13 +226,13 @@ export default class Timeline extends React.PureComponent {
             onPress={() => this.props.toggleModal(i * 60 + 30)}
             style={[
               this.style.line,
-               {top: offset * index + 50, width: dimensionWidth - EVENT_DIFF}]}
+               { height: 25, top: offset * index + 50, width: dimensionWidth - EVENT_DIFF}]}
           />
           <TouchableOpacity 
             onPress={() => this.props.toggleModal(i * 60 + 45)}
             style={[
               this.style.line,
-              {top: offset * index + 75, width: dimensionWidth - EVENT_DIFF}]}
+              { height: 25, top: offset * index + 75, width: dimensionWidth - EVENT_DIFF}]}
           />
         </>
       ];
@@ -247,12 +247,12 @@ export default class Timeline extends React.PureComponent {
              onPress={() => { this.props.toggleModal(i * 60)}}
              style={[
                this.style.line, 
-               {height: 33, top: offset * index, width: dimensionWidth - EVENT_DIFF}]}
+               {height: 33.3, top: offset * index, width: dimensionWidth - EVENT_DIFF}]}
               />
             <TouchableOpacity 
               onPress={() => { this.props.toggleModal(i * 60 + 20)}}
               style={[this.style.line,
-              {height: 33, top: offset * index + 33, width: dimensionWidth - EVENT_DIFF}]} />
+              {height: 33.3, top: offset * index + 33.3, width: dimensionWidth - EVENT_DIFF}]} />
           </View>
         ),
         ,

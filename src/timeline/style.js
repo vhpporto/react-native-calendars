@@ -86,7 +86,9 @@ export default function styleConstructor(theme = {}, calendarHeight) {
       height: 1,
       position: 'absolute',
       left: leftMargin,
-      backgroundColor: 'rgb(216,216,216)',
+      borderBottomWidth: 1,
+      borderColor: '#ddd',
+      // backgroundColor: 'rgb(216,216,216)',
       ...theme.line
     },
     lineNow: {

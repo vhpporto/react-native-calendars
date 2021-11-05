@@ -79,10 +79,6 @@ export default class Timeline extends React.PureComponent {
   }
 
   componentDidMount() {
-    const { start, end } = this.props
-    const slotsHora = 60 / this.props.paramTempoAgenda 
-    console.log('slot -> ' + slotsHora)
-    console.log(100 / slotsHora)
     if (this.isCurrentDateStringForTimeIndicatorSet()) {
       this.setState({
         currentTimeIndicatorTopCoordinate: this.currentTimeOffset()
@@ -144,7 +140,7 @@ export default class Timeline extends React.PureComponent {
         <View style={{flexDirection: 'row'}}>
           <View style={{ marginTop: -10,  top: this.state.currentTimeIndicatorTopCoordinate,
              height: 20, width: 40, backgroundColor: 'red', borderRadius: 7, marginLeft: 10, alignItems: 'center', justifyContent: 'center'}}>
-              <Text style={{ color: 'white', fontSize: 10}}>{moment(new Date()).format('hh:mm')}</Text>
+              <Text style={{ color: 'white', fontSize: 10}}>{moment(new Date()).format('HH:mm')}</Text>
           </View>
 
         <View
@@ -177,98 +173,43 @@ export default class Timeline extends React.PureComponent {
 
 
   _renderLines() {
-    const {format24h, start = 0, end = 24} = this.props;
+    const {format24h, start = 0, end = 24, paramTempoAgenda  = 30} = this.props;
+    const HORA_CHEIA_EM_MINUTOS = 60;
+    const quantidadeSlots = Math.ceil(60 / paramTempoAgenda)
+    const tamanhoSlotHora = this.calendarHeight / 24 / (60 / paramTempoAgenda)
     const offset = this.calendarHeight / (end - start);
     const EVENT_DIFF = 20;
 
-    return range(start, end + 1).map((i, index) => {
+
+    return range(start, end + 1).map((hora, index) => {
       let timeText;
 
-      if (i === start) {
+      if (hora === start) {
         timeText = '';
-      } else if (i < 12) {
-        timeText = !format24h ? `${i} AM` : `${i}:00`;
-      } else if (i === 12) {
-        timeText = !format24h ? `${i} PM` : `${i}:00`;
-      } else if (i === 24) {
+      } else if (hora < 12) {
+        timeText = !format24h ? `${hora} AM` : `${hora}:00`;
+      } else if (hora === 12) {
+        timeText = !format24h ? `${hora} PM` : `${hora}:00`;
+      } else if (hora === 24) {
         timeText = !format24h ? '12 AM' : '23:59';
       } else {
-        timeText = !format24h ? `${i - 12} PM` : `${i}:00`;
+        timeText = !format24h ? `${hora - 12} PM` : `${hora}:00`;
       }
-      
 
-
-  
-      if (this.props.paramTempoAgenda === '15') {
       return [
-        <Text key={`timeLabel${i}`} style={[this.style.timeLabel, {top: offset * index - 6}]}>
+        <Text key={`timeLabel${hora}`} style={[this.style.timeLabel, {top: offset * index - 6}]}>
           {timeText}
         </Text>,
-        i === start ? null : (
-          <>
-            <TouchableOpacity
-              key={`bt1line${i}`}
-             onPress={() => { this.props.toggleModal(i * 60)}}
-             style={[
-               this.style.line, 
-               {height: 25, top: offset * index, width: dimensionWidth - EVENT_DIFF}]}
-              />
-            <TouchableOpacity 
-              onPress={() => { this.props.toggleModal(i * 60 + 15)}}
-              style={[this.style.line , { height: 25} ,
-              { top: offset * index + 25, width: dimensionWidth - EVENT_DIFF}]} />
-          </>
-        ),
-        ,
-        <>
-          <TouchableOpacity 
-          key={`linehalf${i}`}
-            onPress={() => this.props.toggleModal(i * 60 + 30)}
+        [...Array(quantidadeSlots).keys()].map((slot, indx) => (
+          <TouchableOpacity
+            key={`bt1line${indx}`}
+            onPress={() => { this.props.toggleModal(hora * HORA_CHEIA_EM_MINUTOS + ( HORA_CHEIA_EM_MINUTOS / quantidadeSlots * indx) )}}
             style={[
-              this.style.line,
-               { height: 25, top: offset * index + 50, width: dimensionWidth - EVENT_DIFF}]}
+              this.style.line, 
+              {height: tamanhoSlotHora, top: offset * index + (indx * tamanhoSlotHora), width: dimensionWidth - EVENT_DIFF}]}
           />
-          <TouchableOpacity 
-            onPress={() => this.props.toggleModal(i * 60 + 45)}
-            style={[
-              this.style.line,
-              { height: 25, top: offset * index + 75, width: dimensionWidth - EVENT_DIFF}]}
-          />
-        </>
-      ];
-    } else {
-      return [
-        <Text key={`timeLabel${i}`} style={[this.style.timeLabel, {top: offset * index - 6}]}>
-          {timeText}
-        </Text>,
-        i === start ? null : (
-          <View key={`bt1line${i}`} >
-            <TouchableOpacity
-             onPress={() => { this.props.toggleModal(i * 60)}}
-             style={[
-               this.style.line, 
-               {height: 33.3, top: offset * index, width: dimensionWidth - EVENT_DIFF}]}
-              />
-            <TouchableOpacity 
-              onPress={() => { this.props.toggleModal(i * 60 + 20)}}
-              style={[this.style.line,
-              {height: 33.3, top: offset * index + 33.3, width: dimensionWidth - EVENT_DIFF}]} />
-          </View>
-        ),
-        ,
-        <Text key={`2timeLabel${i}`} style={[this.style.timeLabel, {top: offset * index - 6}]}>
-        {timeText}
-      </Text>,
-        <View key={`linehalf${i}`}>
-          <TouchableOpacity 
-            onPress={() => this.props.toggleModal(i * 60 + 40)}
-            style={[
-              this.style.line,
-               {height: 34, top: offset * index + 66, width: dimensionWidth - EVENT_DIFF}]}
-          />
-        </View>
-      ];
-    }
+        ))
+        ]
     });
   }
 
@@ -367,7 +308,7 @@ export default class Timeline extends React.PureComponent {
               {event.title === 'SEM JORNADA' && (
                 <Text numberOfLines={1} style={this.style.eventTitle}>
                  <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>
-                  1 - {XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}
+                  {XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}
                  </Text>
               </Text>
               ) }

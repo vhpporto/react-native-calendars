@@ -14,6 +14,16 @@ Icon.loadFont()
 const LEFT_MARGIN = 60 - 1;
 const TEXT_LINE_HEIGHT = 17;
 
+function calculaOffset(param = 15)  {
+  if (param == 10) {
+    return 150
+  } 
+  if (param == 15) {
+    return 150
+  } 
+    return 100
+}
+
 function range(from, to) {
   return Array.from(Array(to), (_, i) => from + i);
 }
@@ -50,16 +60,14 @@ export default class Timeline extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const {start, end} = this.props;
-    this.calendarHeight = (end - start) * 100;
-
+    const {start, end, paramTempoAgenda} = this.props;
+    this.calendarHeight = (end - start) * calculaOffset(paramTempoAgenda)
     this.style = styleConstructor(props.styles, this.calendarHeight);
 
     const width = dimensionWidth - LEFT_MARGIN;
-    const packedEvents = populateEvents(props.events, width, start);
+    const packedEvents = populateEvents(props.events, width, start, calculaOffset(paramTempoAgenda));
     let initPosition = _.min(_.map(packedEvents, 'top')) - this.calendarHeight / (end - start);
     const verifiedInitPosition = initPosition < 0 ? 0 : initPosition;
-
     this.state = {
       _scrollY: verifiedInitPosition,
       packedEvents
@@ -69,11 +77,11 @@ export default class Timeline extends React.PureComponent {
   componentDidUpdate(prevProps) {
     const width = dimensionWidth - LEFT_MARGIN;
     const {events: prevEvents, start: prevStart = 0} = prevProps;
-    const {events, start = 0} = this.props;
+    const {events, start = 0, paramTempoAgenda} = this.props;
 
     if (prevEvents !== events || prevStart !== start) {
       this.setState({
-        packedEvents: populateEvents(events, width, start)
+        packedEvents: populateEvents(events, width, start, calculaOffset(paramTempoAgenda))
       });
     }
   }
@@ -119,8 +127,8 @@ export default class Timeline extends React.PureComponent {
   }
 
   currentTimeOffset() {
-    const offset = 100;
-    const {start = 0} = this.props;
+    const {start = 0, paramTempoAgenda} = this.props;
+    const offset = calculaOffset(paramTempoAgenda);
     const timeNowHour = moment().hour();
     const timeNowMin = moment().minutes();
 
@@ -174,12 +182,21 @@ export default class Timeline extends React.PureComponent {
 
   _renderLines() {
     const {format24h, start = 0, end = 24, paramTempoAgenda  = 30} = this.props;
+    let param = paramTempoAgenda
+    if (paramTempoAgenda == 40) {
+      param = 20 
+    } else if (paramTempoAgenda == 45) {
+      param = 15 
+    } else if (paramTempoAgenda == 60) {
+      param = 30 
+    }
     const HORA_CHEIA_EM_MINUTOS = 60;
-    const quantidadeSlots = Math.ceil(60 / paramTempoAgenda)
-    const tamanhoSlotHora = this.calendarHeight / 24 / (60 / paramTempoAgenda)
-    const offset = this.calendarHeight / (end - start);
+    let QUANTIDADE_SLOTS = Math.ceil(HORA_CHEIA_EM_MINUTOS / param)
+    const TAMANHO_SLOT_HORA = this.calendarHeight / 24 / (60 / param)
     const EVENT_DIFF = 20;
+    const offset = this.calendarHeight / (end - start);
 
+    
 
     return range(start, end + 1).map((hora, index) => {
       let timeText;
@@ -200,13 +217,13 @@ export default class Timeline extends React.PureComponent {
         <Text key={`timeLabel${hora}`} style={[this.style.timeLabel, {top: offset * index - 6}]}>
           {timeText}
         </Text>,
-        [...Array(quantidadeSlots).keys()].map((slot, indx) => (
+        [...Array(QUANTIDADE_SLOTS).keys()].map((slot, indx) => (
           <TouchableOpacity
             key={`bt1line${indx}`}
-            onPress={() => { this.props.toggleModal(hora * HORA_CHEIA_EM_MINUTOS + ( HORA_CHEIA_EM_MINUTOS / quantidadeSlots * indx) )}}
+            onPress={() => { this.props.toggleModal(hora * HORA_CHEIA_EM_MINUTOS + ( HORA_CHEIA_EM_MINUTOS / QUANTIDADE_SLOTS * indx) )}}
             style={[
               this.style.line, 
-              {height: tamanhoSlotHora, top: offset * index + (indx * tamanhoSlotHora), width: dimensionWidth - EVENT_DIFF}]}
+              {height: TAMANHO_SLOT_HORA, top: offset * index + (indx * TAMANHO_SLOT_HORA), width: dimensionWidth - EVENT_DIFF}]}
           />
         ))
         ]
@@ -252,23 +269,7 @@ export default class Timeline extends React.PureComponent {
     this.props.abrirDetalhesAgendamento(JSON.stringify(event))
   }
 
-  colorShade = (col, amt) => {
-    col = col.replace(/^#/, '')
-    if (col.length === 3) col = col[0] + col[0] + col[1] + col[1] + col[2] + col[2]
-  
-    let [r, g, b] = col.match(/.{2}/g);
-    ([r, g, b] = [parseInt(r, 16) + amt, parseInt(g, 16) + amt, parseInt(b, 16) + amt])
-  
-    r = Math.max(Math.min(255, r), 0).toString(16)
-    g = Math.max(Math.min(255, g), 0).toString(16)
-    b = Math.max(Math.min(255, b), 0).toString(16)
-  
-    const rr = (r.length < 2 ? '0' : '') + r
-    const gg = (g.length < 2 ? '0' : '') + g
-    const bb = (b.length < 2 ? '0' : '') + b
-  
-    return `#${rr}${gg}${bb}`
-  }
+
   
   _renderEvents() {
     const {packedEvents} = this.state;
@@ -279,8 +280,6 @@ export default class Timeline extends React.PureComponent {
         width: event.width,
         top: event.top,
         borderLeftWidth: 2,
-        // borderLeftColor: this.colorShade(event.color || '#bfe0ff', -70),
-        // backgroundColor: '#f8d1ff'
         backgroundColor: event.color ? event.color  : '#bfe0ff'
       };
 

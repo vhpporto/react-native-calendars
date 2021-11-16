@@ -3,11 +3,12 @@ import _ from 'lodash';
 import PropTypes, { number } from 'prop-types';
 import XDate from 'xdate';
 import React from 'react';
-import {Alert, View, Text, ScrollView, TouchableOpacity, Dimensions, EventSubscriptionVendor} from 'react-native';
+import {Alert, View, Text, ScrollView, TouchableOpacity, Dimensions, EventSubscriptionVendor, Pressable} from 'react-native';
 import styleConstructor from './style';
 import populateEvents from './Packer';
 import moment from 'moment' 
 import Icon from 'react-native-vector-icons/FontAwesome'
+import { COLORS } from '../../../../src/constants';
 
 Icon.loadFont()
 
@@ -218,11 +219,13 @@ export default class Timeline extends React.PureComponent {
           {timeText}
         </Text>,
         [...Array(QUANTIDADE_SLOTS).keys()].map((slot, indx) => (
-          <TouchableOpacity
+          <Pressable
+            activeOpacity={1}
             key={`bt1line${indx}`}
             onPress={() => { this.props.toggleModal(hora * HORA_CHEIA_EM_MINUTOS + ( HORA_CHEIA_EM_MINUTOS / QUANTIDADE_SLOTS * indx) )}}
-            style={[
+            style={({ pressed }) => [
               this.style.line, 
+              {backgroundColor: pressed ? COLORS.secondary : COLORS.white},
               {height: TAMANHO_SLOT_HORA, top: offset * index + (indx * TAMANHO_SLOT_HORA), width: dimensionWidth - EVENT_DIFF}]}
           />
         ))

@@ -17,10 +17,10 @@ const TEXT_LINE_HEIGHT = 17;
 
 function calculaOffset(param = 15)  {
   if (param == 10) {
-    return 150
+    return 200
   } 
-  if (param == 15) {
-    return 150
+  if (param == 15 || param == 45) {
+    return 140
   } 
     return 100
 }

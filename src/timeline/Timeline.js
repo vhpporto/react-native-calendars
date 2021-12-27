@@ -356,6 +356,12 @@ export default class Timeline extends React.PureComponent {
   render() {
     return (
       <ScrollView
+         refreshControl={
+          <RefreshControl
+            refreshing={this.props.loading}
+            onRefresh={this.props.buscaJornadaProfissional}
+          />
+        }
         ref={ref => (this._scrollView = ref)}
         contentContainerStyle={[this.style.contentStyle,
         {width: dimensionWidth}]}>

@@ -3,7 +3,7 @@ import _ from 'lodash';
 import PropTypes, { number } from 'prop-types';
 import XDate from 'xdate';
 import React from 'react';
-import {Alert, View, Text, ScrollView, TouchableOpacity, Dimensions, EventSubscriptionVendor, Pressable} from 'react-native';
+import {RefreshControl, Alert, View, Text, ScrollView, TouchableOpacity, Dimensions, EventSubscriptionVendor, Pressable} from 'react-native';
 import styleConstructor from './style';
 import populateEvents from './Packer';
 import moment from 'moment' 

@@ -1,3 +1,4 @@
+import {COLORS} from '../../../src/constants'
 export const foregroundColor = 'white';
 export const backgroundColor = '#f2F4f5'; // Agenda's reservations bg color
 
@@ -9,7 +10,7 @@ export const textSecondaryColor = '#7a92a5'; // not in use
 
 export const textDefaultColor = '#2d4150';
 export const textColor = '#43515c';
-export const textLinkColor = '#225ade';
+export const textLinkColor = COLORS.primary;
 
 export const textDayFontFamily = 'System';
 export const textMonthFontFamily = 'System';

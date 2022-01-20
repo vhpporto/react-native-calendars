@@ -319,7 +319,7 @@ export default class Timeline extends React.PureComponent {
                 <Text numberOfLines={1} style={this.style.eventTitle}>
                   <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>
                     {XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}</Text>
-                    {' '}{event.servico || ''} -  {event.usuario}
+                    {' '}{event.servico || ''} - {event.usuario}
                 </Text>
               ) : (
                 <>
@@ -329,7 +329,7 @@ export default class Timeline extends React.PureComponent {
                   </Text>
                   )}
                   <Text numberOfLines={1} style={this.style.eventTitle}>
-                    {event.servico || ''} {event.status !== 'Bloqueado' && event.status !== 'SEM JORNADA' && event.usuario }
+                    {event.servico || ''} - {event.status !== 'Bloqueado' && event.status !== 'SEM JORNADA' && event.usuario }
                   </Text>
                 </>
               )}

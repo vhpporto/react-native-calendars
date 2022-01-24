@@ -249,7 +249,7 @@ export default class Timeline extends React.PureComponent {
 
   _onEventTapped(event) {
     if (event.status === 'Sem Jornada') return
-    if (event.status === 'Realizado') {
+    if (event.status === 'Realizado' || event.status === 'Ausente') {
       return this.renderAlert(
         'Comanda finalizada',
         'Deseja reabrir este agendamento ?',

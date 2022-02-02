@@ -22,7 +22,7 @@ function calculaOffset(param = 15)  {
   if (param == 15 || param == 45) {
     return 140
   } 
-    return 100
+    return 130
 }
 
 function range(from, to) {
@@ -292,7 +292,7 @@ export default class Timeline extends React.PureComponent {
       const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
 
       return (
-        <TouchableOpacity
+         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => this._onEventTapped(this.props.events[event.index])}
           key={i}
@@ -314,7 +314,7 @@ export default class Timeline extends React.PureComponent {
                  </Text>
               </Text>
               ) }
-              {numberOfLines < 2 ? (
+              {numberOfLines <= 2 ? (
                event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
                 <Text numberOfLines={1} style={this.style.eventTitle}>
                   <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>
@@ -333,7 +333,7 @@ export default class Timeline extends React.PureComponent {
                   </Text>
                 </>
               )}
-              {numberOfLines > 2 && event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
+              {numberOfLines >=1 &&  event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
                 (
                   <Text numberOfLines={numberOfLines - 1} style={[this.style.eventSummary]}>
                     {event.obs !== 'Agenda Bloqueada' && event.obs || ''}

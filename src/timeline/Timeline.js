@@ -233,7 +233,7 @@ export default class Timeline extends React.PureComponent {
     });
   }
 
-  renderAlert(title, subtitle,tipo, id) {
+  renderAlert(title, subtitle,tipo, id, citCodigo) {
     return Alert.alert(title, subtitle, [
       {
         text: 'Não',
@@ -241,20 +241,22 @@ export default class Timeline extends React.PureComponent {
       { 
         text: 'Sim',
         onPress: () => tipo === 'reabrir'
-           ? this.props.atualizaComanda(id)
+           ? this.props.atualizaComanda(id, citCodigo)
            : this.props.desbloquearHorario(id)
       }
     ])
   }
 
   _onEventTapped(event) {
+    console.log(event)
     if (event.status === 'Sem Jornada') return
     if (event.status === 'Realizado' || event.status === 'Ausente') {
       return this.renderAlert(
         'Comanda finalizada',
         'Deseja reabrir este agendamento ?',
         'reabrir',
-        event.Com_Codigo
+        event.Com_Codigo,
+        event.CIt_Codigo
       )
     }
     if (event.status === 'Bloqueado') {
@@ -292,7 +294,7 @@ export default class Timeline extends React.PureComponent {
       const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
 
       return (
-         <TouchableOpacity
+        <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => this._onEventTapped(this.props.events[event.index])}
           key={i}

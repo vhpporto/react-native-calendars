@@ -1,6 +1,6 @@
 // @flow
 import _ from 'lodash';
-import PropTypes, { number } from 'prop-types';
+import PropTypes from 'prop-types';
 import XDate from 'xdate';
 import React from 'react';
 import {RefreshControl, Alert, View, Text, ScrollView, TouchableOpacity, Dimensions, EventSubscriptionVendor, Pressable} from 'react-native';
@@ -233,37 +233,68 @@ export default class Timeline extends React.PureComponent {
     });
   }
 
-  renderAlert(title, subtitle,tipo, id, citCodigo) {
+  renderAlertAusente(title, subtitle,id, citCodigo) {
     return Alert.alert(title, subtitle, [
       {
         text: 'Não',
       },
       { 
         text: 'Sim',
-        onPress: () => tipo === 'reabrir'
-           ? this.props.atualizaComanda(id, citCodigo)
-           : this.props.desbloquearHorario(id)
+        onPress: () => this.props.atualizaComanda(id, citCodigo)
+      }
+    ])
+  }
+
+  renderAlertProntuario(title, subtitle, event) {
+    console.log(event)
+    return Alert.alert(title, subtitle, [
+      {
+        text: 'Reabrir agendamento',
+        onPress: () => this.props.atualizaComanda(event.Com_Codigo, event.CIt_Codigo)
+      },
+      {
+        text: 'Prontuário',
+        onPress: () => this.props.irParaProntuario(event)
+      },
+      {
+        text: 'Voltar',
+      },
+    ])
+  }
+
+  renderAlert(title, subtitle,id) {
+    return Alert.alert(title, subtitle, [
+      {
+        text: 'Não',
+      },
+      { 
+        text: 'Sim',
+        onPress: () => this.props.desbloquearHorario(id)
       }
     ])
   }
 
   _onEventTapped(event) {
-    console.log(event)
     if (event.status === 'Sem Jornada') return
-    if (event.status === 'Realizado' || event.status === 'Ausente') {
-      return this.renderAlert(
+    if (event.status === 'Ausente' || (event.codCliente === "" && event.codStatus !== '1')) {
+      return this.renderAlertAusente(
         'Comanda finalizada',
         'Deseja reabrir este agendamento ?',
-        'reabrir',
         event.Com_Codigo,
         event.CIt_Codigo
+      )
+    }
+    if (event.status === 'Realizado') {
+      return this.renderAlertProntuario(
+        'Comanda finalizada',
+        'Escolha uma opção',
+        event
       )
     }
     if (event.status === 'Bloqueado') {
       return this.renderAlert(
         'Desbloquear horário',
         'Tem certeza que deseja desbloquear este horário ?',
-        'desbloquear',
         event.id
       )
     }

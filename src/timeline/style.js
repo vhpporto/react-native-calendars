@@ -105,6 +105,24 @@ export default function styleConstructor(theme = {}, calendarHeight) {
       fontFamily: Platform.OS === 'ios' ? 'Helvetica Neue' : 'Roboto',
       fontWeight: '500',
       ...theme.timeLabel
+    },
+    containerTime: {
+      marginTop: -10,
+      height: 20,
+      width: 40,
+      backgroundColor: 'red',
+      borderRadius: 7,
+      marginLeft: 10,
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    textTimeNow: {
+      color: 'white',
+      fontSize: 10
+    },
+    bold: {
+      fontWeight: '600',
+      alignItems: 'center'
     }
   };
   return StyleSheet.create(style);

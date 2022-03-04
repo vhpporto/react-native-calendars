@@ -3,7 +3,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
 import React from 'react';
-import {RefreshControl, Alert, View, Text, ScrollView, TouchableOpacity, Dimensions, EventSubscriptionVendor, Pressable} from 'react-native';
+import {RefreshControl, Alert, View, Text, ScrollView, TouchableOpacity, Dimensions, Pressable} from 'react-native';
 import styleConstructor from './style';
 import populateEvents from './Packer';
 import moment from 'moment' 
@@ -143,13 +143,10 @@ export default class Timeline extends React.PureComponent {
   _renderCurrentTimeIndicator() {
     if (this.isCurrentDateStringForTimeIndicatorSet() &&
       this.props.currentDateString === moment().format('YYYY-MM-DD')) {
-      // currentDateString format YYYY-MM-DD, e.g. 2020-11-06
-      // Time indicator should be displayed only on the current date
       return (
         <View style={{flexDirection: 'row'}}>
-          <View style={{ marginTop: -10,  top: this.state.currentTimeIndicatorTopCoordinate,
-             height: 20, width: 40, backgroundColor: 'red', borderRadius: 7, marginLeft: 10, alignItems: 'center', justifyContent: 'center'}}>
-              <Text style={{ color: 'white', fontSize: 10}}>{moment(new Date()).format('HH:mm')}</Text>
+          <View style={[{top: this.state.currentTimeIndicatorTopCoordinate}, this.style.containerTime]}>
+              <Text style={this.style.textTimeNow}>{moment(new Date()).format('HH:mm')}</Text>
           </View>
 
         <View
@@ -246,7 +243,6 @@ export default class Timeline extends React.PureComponent {
   }
 
   renderAlertProntuario(title, subtitle, event) {
-    console.log(event)
     return Alert.alert(title, subtitle, [
       {
         text: 'Reabrir agendamento',
@@ -305,8 +301,11 @@ export default class Timeline extends React.PureComponent {
     this.props.abrirDetalhesAgendamento(JSON.stringify(event))
   }
 
+  horaAgendamento(inicio,fim) {
+    const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
+    return `${XDate(inicio).toString(formatTime)} - ${XDate(fim).toString(formatTime)}`
+  }
 
-  
   _renderEvents() {
     const {packedEvents} = this.state;
     let events = packedEvents.map((event, i) => {
@@ -319,10 +318,7 @@ export default class Timeline extends React.PureComponent {
         backgroundColor: event.color ? event.color  : '#bfe0ff'
       };
 
-      // Fixing the number of lines for the event title makes this calculation easier.
-      // However it would make sense to overflow the title to a new line if needed
       const numberOfLines = Math.floor(event.height / TEXT_LINE_HEIGHT);
-      const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
 
       return (
         <TouchableOpacity
@@ -342,23 +338,23 @@ export default class Timeline extends React.PureComponent {
               ) }
               {event.title === 'SEM JORNADA' && (
                 <Text numberOfLines={1} style={this.style.eventTitle}>
-                 <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>
-                  {XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}
+                 <Text style={[this.style.eventTimes, this.style.bold]}>
+                  {this.horaAgendamento(event.start, event.end)}
                  </Text>
               </Text>
               ) }
               {numberOfLines <= 2 ? (
                event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
                 <Text numberOfLines={1} style={this.style.eventTitle}>
-                  <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>
-                    {XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}</Text>
+                  <Text style={[this.style.eventTimes, this.style.bold]}>
+                    {this.horaAgendamento(event.start, event.end)}</Text>
                     {' '}{event.servico || ''} - {event.usuario}
                 </Text>
               ) : (
                 <>
                   {event.title !== 'SEM JORNADA' && (
-                  <Text style={[this.style.eventTimes, { fontWeight: '600', alignItems: 'center'}]}>
-                  {XDate(event.start).toString(formatTime)} - {XDate(event.end).toString(formatTime)}
+                  <Text style={[this.style.eventTimes, this.style.bold]}>
+                  {this.horaAgendamento(event.start, event.end)}
                   </Text>
                   )}
                   <Text numberOfLines={1} style={this.style.eventTitle}>

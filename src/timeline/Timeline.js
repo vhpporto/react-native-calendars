@@ -77,11 +77,12 @@ export default class Timeline extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     const width = dimensionWidth - LEFT_MARGIN;
-    const {events: prevEvents, start: prevStart = 0} = prevProps;
-    const {events,end, start = 0, paramTempoAgenda,} = this.props;
-    this.calendarHeight = (end - start) * calculaOffset(paramTempoAgenda)
-
-    if (prevEvents !== events || prevStart !== start) {
+    const {events: prevEvents, start: prevStart = 0, paramTempoAgenda: prevParam} = prevProps;
+    const {events,end, start = 0, paramTempoAgenda} = this.props;
+    
+    if (prevEvents !== events || prevStart !== start || prevParam !== paramTempoAgenda) {
+      this.calendarHeight = (end - start) * calculaOffset(paramTempoAgenda)
+      this.style = styleConstructor(this.props.styles, this.calendarHeight);
       this.setState({
         packedEvents: populateEvents(events, width, start, calculaOffset(paramTempoAgenda))
       });

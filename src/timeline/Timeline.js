@@ -4,11 +4,13 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Alert, Dimensions, Pressable, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import XDate from 'xdate';
 import { COLORS } from '../../../../src/constants';
 import populateEvents from './Packer';
 import styleConstructor from './style';
+
+Icon.loadFont()
 
 const LEFT_MARGIN = 60 - 1;
 const TEXT_LINE_HEIGHT = 17;
@@ -75,10 +77,12 @@ export default class Timeline extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     const width = dimensionWidth - LEFT_MARGIN;
-    const {events: prevEvents, start: prevStart = 0} = prevProps;
-    const {events, start = 0, paramTempoAgenda} = this.props;
+    const {events: prevEvents, start: prevStart = 0, paramTempoAgenda: prevParam} = prevProps;
+    const {events, end = 24, start = 0, paramTempoAgenda} = this.props;
 
-    if (prevEvents !== events || prevStart !== start) {
+    if (prevEvents !== events || prevStart !== start || prevParam !== paramTempoAgenda) {
+      this.calendarHeight = (end - start) * calculaOffset(paramTempoAgenda)
+      this.style = styleConstructor(this.props.styles, this.calendarHeight);
       this.setState({
         packedEvents: populateEvents(events, width, start, calculaOffset(paramTempoAgenda))
       });
@@ -299,19 +303,9 @@ export default class Timeline extends React.PureComponent {
     this.props.abrirDetalhesAgendamento(JSON.stringify(event))
   }
 
-  horaAgendamento(inicio,fim, isAssinatura) {
+  horaAgendamento(inicio,fim) {
     const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
-    return (
-      <>
-      {isAssinatura && (
-        <>
-        <FontAwesome name='star' color={'orange'} style={{marginRight: 10}} />
-        {'  '}
-        </>
-      ) }
-     {XDate(inicio).toString(formatTime)} - {XDate(fim).toString(formatTime)}
-      </>
-    )
+    return `${XDate(inicio).toString(formatTime)} - ${XDate(fim).toString(formatTime)}`
   }
 
   _renderEvents() {
@@ -327,8 +321,7 @@ export default class Timeline extends React.PureComponent {
       };
 
       const numberOfLines = Math.floor(event.height / TEXT_LINE_HEIGHT);
-      const isAssinatura = event.assinatura && event.assinatura !== ''
- 
+
       return (
         <TouchableOpacity
           activeOpacity={0.9}
@@ -356,14 +349,14 @@ export default class Timeline extends React.PureComponent {
                event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
                 <Text numberOfLines={1} style={this.style.eventTitle}>
                   <Text style={[this.style.eventTimes, this.style.bold]}>
-                    {this.horaAgendamento(event.start, event.end, isAssinatura)}</Text>
+                    {this.horaAgendamento(event.start, event.end)}</Text>
                     {' '}{event.servico || ''} - {event.usuario}
                 </Text>
               ) : (
                 <>
                   {event.title !== 'SEM JORNADA' && (
                   <Text style={[this.style.eventTimes, this.style.bold]}>
-                  {this.horaAgendamento(event.start, event.end, isAssinatura)}
+                  {this.horaAgendamento(event.start, event.end)}
                   </Text>
                   )}
                   <Text numberOfLines={1} style={this.style.eventTitle}>

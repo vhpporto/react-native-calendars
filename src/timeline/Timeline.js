@@ -4,13 +4,11 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Alert, Dimensions, Pressable, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import XDate from 'xdate';
 import { COLORS } from '../../../../src/constants';
 import populateEvents from './Packer';
 import styleConstructor from './style';
-
-Icon.loadFont()
 
 const LEFT_MARGIN = 60 - 1;
 const TEXT_LINE_HEIGHT = 17;
@@ -303,9 +301,15 @@ export default class Timeline extends React.PureComponent {
     this.props.abrirDetalhesAgendamento(JSON.stringify(event))
   }
 
-  horaAgendamento(inicio,fim) {
+  horaAgendamento(inicio,fim, isAssinatura) {
     const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
-    return `${XDate(inicio).toString(formatTime)} - ${XDate(fim).toString(formatTime)}`
+    return (
+      <>
+        {XDate(inicio).toString(formatTime)} - {XDate(fim).toString(formatTime)}{' '}
+        {isAssinatura && <FontAwesome name='star' color='orange'/>}
+      </>
+
+    )
   }
 
   _renderEvents() {
@@ -321,6 +325,7 @@ export default class Timeline extends React.PureComponent {
       };
 
       const numberOfLines = Math.floor(event.height / TEXT_LINE_HEIGHT);
+      const isAssinatura = event.assinatura && event.assinatura !== '';
 
       return (
         <TouchableOpacity
@@ -349,14 +354,14 @@ export default class Timeline extends React.PureComponent {
                event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
                 <Text numberOfLines={1} style={this.style.eventTitle}>
                   <Text style={[this.style.eventTimes, this.style.bold]}>
-                    {this.horaAgendamento(event.start, event.end)}</Text>
+                    {this.horaAgendamento(event.start, event.end, isAssinatura)}</Text>
                     {' '}{event.servico || ''} - {event.usuario}
                 </Text>
               ) : (
                 <>
                   {event.title !== 'SEM JORNADA' && (
                   <Text style={[this.style.eventTimes, this.style.bold]}>
-                  {this.horaAgendamento(event.start, event.end)}
+                  {this.horaAgendamento(event.start, event.end, isAssinatura)}
                   </Text>
                   )}
                   <Text numberOfLines={1} style={this.style.eventTitle}>

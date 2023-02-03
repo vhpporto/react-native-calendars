@@ -305,8 +305,8 @@ export default class Timeline extends React.PureComponent {
     const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
     return (
       <>
+        {isAssinatura && <FontAwesome name='star' color='orange'/> }{' '}
         {XDate(inicio).toString(formatTime)} - {XDate(fim).toString(formatTime)}{' '}
-        {isAssinatura && <FontAwesome name='star' color='orange'/>}
       </>
 
     )

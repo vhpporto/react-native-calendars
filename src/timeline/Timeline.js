@@ -305,7 +305,7 @@ export default class Timeline extends React.PureComponent {
     const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
     return (
       <>
-        {isAssinatura && <FontAwesome name='star' color='orange'/> }{' '}
+        {isAssinatura && <FontAwesome name='star'  color='orange'/>  }{' '}
         {XDate(inicio).toString(formatTime)} - {XDate(fim).toString(formatTime)}{' '}
       </>
 
@@ -339,12 +339,12 @@ export default class Timeline extends React.PureComponent {
           ) : (
             <View>
               {event.status === 'Bloqueado' && (
-                <Text numberOfLines={1} style={this.style.eventTitle}>
+                <Text numberOfLines={2} style={this.style.eventTitle}>
                  Agenda bloqueada
               </Text>
               ) }
               {event.title === 'SEM JORNADA' && (
-                <Text numberOfLines={1} style={this.style.eventTitle}>
+                <Text numberOfLines={2} style={this.style.eventTitle}>
                  <Text style={[this.style.eventTimes, this.style.bold]}>
                   {this.horaAgendamento(event.start, event.end)}
                  </Text>
@@ -352,7 +352,7 @@ export default class Timeline extends React.PureComponent {
               ) }
               {numberOfLines <= 2 ? (
                event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
-                <Text numberOfLines={1} style={this.style.eventTitle}>
+                <Text numberOfLines={2} style={this.style.eventTitle}>
                   <Text style={[this.style.eventTimes, this.style.bold]}>
                     {this.horaAgendamento(event.start, event.end, isAssinatura)}</Text>
                     {' '}{event.servico || ''} - {event.usuario}
@@ -364,12 +364,12 @@ export default class Timeline extends React.PureComponent {
                   {this.horaAgendamento(event.start, event.end, isAssinatura)}
                   </Text>
                   )}
-                  <Text numberOfLines={1} style={this.style.eventTitle}>
+                  <Text numberOfLines={2} style={this.style.eventTitle}>
                     {event.servico || ''} - {event.status !== 'Bloqueado' && event.status !== 'SEM JORNADA' && event.usuario }
                   </Text>
                 </>
               )}
-              {numberOfLines >=1 &&  event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
+              {numberOfLines >= 1 &&  event.title !== 'SEM JORNADA' && event.status !== 'Bloqueado' &&
                 (
                   <Text numberOfLines={numberOfLines - 1} style={[this.style.eventSummary]}>
                     {event.obs !== 'Agenda Bloqueada' && event.obs || ''}

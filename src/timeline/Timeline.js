@@ -332,9 +332,10 @@ export default class Timeline extends React.PureComponent {
   _renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, isAgendamento) {
     if (!isAgendamento) return null
     return (
-      <Text numberOfLines={numberOfLines} style={[[this.style.eventTitle, { fontSize: titleFontSize }]]}>
+
+      <Text numberOfLines={numberOfLines} style={[this.style.eventTitle, { fontSize: titleFontSize }]}>
         {this.horaAgendamento(event.start, event.end, isAssinatura)}
-        {' '}{event.servico || ''} - {event.usuario}  <Text numberOfLines={numberOfLines - 1} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>
+        {' '}{event.servico || ''} - {event.usuario}  <Text numberOfLines={numberOfLines} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>
           {event.obs !== 'Agenda Bloqueada' && event.obs || ''}
         </Text>
       </Text>
@@ -380,7 +381,7 @@ export default class Timeline extends React.PureComponent {
       const isSemJornada = event.status === 'SEM JORNADA'
       const isAgendamento = !isBloqueio && !isSemJornada
 
-      const numberOfLines = Math.floor(event.height / TEXT_LINE_HEIGHT);
+      const numberOfLines = Math.abs(Math.floor(event.height / TEXT_LINE_HEIGHT));
       const isAssinatura = event.assinatura && event.assinatura !== '';
       const obsFontSize = numberOfLines <= 3 ? 10 : 11
       const titleFontSize = numberOfLines <= 3 ? 12 : 14

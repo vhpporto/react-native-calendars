@@ -330,9 +330,14 @@ export default class Timeline extends React.PureComponent {
   }
 
   _renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, isAgendamento) {
-    if (!isAgendamento) return null
+    if (!isAgendamento) {
+      return (
+        <Text numberOfLines={numberOfLines} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>
+          {event.obs || ''}
+        </Text>
+      )
+    }
     return (
-
       <Text numberOfLines={numberOfLines} style={[this.style.eventTitle, { fontSize: titleFontSize }]}>
         {this.horaAgendamento(event.start, event.end, isAssinatura)}
         {' '}{event.servico || ''} - {event.usuario}  <Text numberOfLines={numberOfLines} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>

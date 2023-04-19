@@ -336,19 +336,19 @@ export default class Timeline extends React.PureComponent {
       <Text numberOfLines={numberOfLines} style={[this.style.eventTitle, { fontSize: titleFontSize }]}>
         {this.horaAgendamento(event.start, event.end, isAssinatura)}
         {' '}{event.servico || ''} - {event.usuario}  <Text numberOfLines={numberOfLines} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>
-          {event.obs !== 'Agenda Bloqueada' && event.obs || ''}
+          {event.obs || ''}
         </Text>
       </Text>
     )
   }
 
   _renderEventThreeLines(event, numberOfLines, titleFontSize, obsFontSize, isAgendamento) {
-    if (!isAgendamento) return null
+
     return (
       <Text numberOfLines={numberOfLines - 1} style={[this.style.eventTitle, { fontSize: titleFontSize }]}>
-        {event.servico || ''} - {isAgendamento && event.usuario}
+        {event.servico || ''}{event.servico ? ' - ' : null}{isAgendamento && event.usuario}
         <Text numberOfLines={numberOfLines} style={[this.style.eventSummary, { fontSize: obsFontSize, fontWeight: 'normal' }]}>
-          {' '}{event.obs !== 'Agenda Bloqueada' && event.obs || ''}
+          {' '}{event.obs || ''}
         </Text>
       </Text>
     )
@@ -358,9 +358,9 @@ export default class Timeline extends React.PureComponent {
     return (
       <>
         <Text numberOfLines={numberOfLines} style={[this.style.eventTitle, { fontSize: titleFontSize }]}>
-          {event.servico || ''} - {isAgendamento && event.usuario}
+          {event.servico || ''}{event.servico ? ' - ' : null}{isAgendamento && event.usuario}
         </Text>
-        <Text numberOfLines={numberOfLines - 1} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>{event.obs !== 'Agenda Bloqueada' && event.obs || ''}</Text>
+        <Text numberOfLines={numberOfLines - 1} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>{event.obs || ''}</Text>
       </>
     )
   }

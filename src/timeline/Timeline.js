@@ -330,7 +330,7 @@ export default class Timeline extends React.PureComponent {
     return this.horaAgendamento(event.start, event.end)
   }
 
-  _renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, isAgendamento) {
+  _renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, isAgendamento, hasCoupon) {
     if (!isAgendamento) {
       return (
         <Text numberOfLines={numberOfLines} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>
@@ -340,7 +340,7 @@ export default class Timeline extends React.PureComponent {
     }
     return (
       <Text numberOfLines={numberOfLines} style={[this.style.eventTitle, { fontSize: titleFontSize }]}>
-        {this.horaAgendamento(event.start, event.end, isAssinatura)}
+        {this.horaAgendamento(event.start, event.end, isAssinatura, hasCoupon)}
         {' '}{event.servico || ''} - {event.usuario}  <Text numberOfLines={numberOfLines} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>
           {event.obs || ''}
         </Text>
@@ -407,7 +407,7 @@ export default class Timeline extends React.PureComponent {
               {isSemJornada ? this._renderSemJornada(event) : null}
 
               {numberOfLines <= 2 ? (
-                this._renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, isAgendamento)
+                this._renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, isAgendamento, hasCoupon)
               ) : (
                 <>
                   {isAgendamento && (

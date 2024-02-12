@@ -302,13 +302,14 @@ export default class Timeline extends React.PureComponent {
     this.props.abrirDetalhesAgendamento(JSON.stringify(event))
   }
 
-  horaAgendamento(inicio, fim, isAssinatura) {
+  horaAgendamento(inicio, fim, isAssinatura, hasCoupon) {
     const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
     return (
       <>
         <Text style={[this.style.eventTitle]}>
           <Text style={[this.style.eventTimes, this.style.bold]}>
-            {isAssinatura && <FontAwesome name='star' color='orange' />}{' '}
+            {isAssinatura ? <FontAwesome  name='star' color='orange' /> : null}
+            {hasCoupon ? <FontAwesome  name='tag' color='green' /> : null}{' '}
             {XDate(inicio).toString(formatTime)} - {XDate(fim).toString(formatTime)}{' '}
           </Text>
         </Text>
@@ -388,6 +389,7 @@ export default class Timeline extends React.PureComponent {
 
       const numberOfLines = Math.abs(Math.floor(event.height / TEXT_LINE_HEIGHT));
       const isAssinatura = event.assinatura && event.assinatura !== '';
+      const hasCoupon = event.cupom && event.cupom !== '';
       const obsFontSize = numberOfLines <= 3 ? 10 : 11
       const titleFontSize = numberOfLines <= 3 ? 12 : 14
 
@@ -409,7 +411,7 @@ export default class Timeline extends React.PureComponent {
               ) : (
                 <>
                   {isAgendamento && (
-                    this.horaAgendamento(event.start, event.end, isAssinatura)
+                    this.horaAgendamento(event.start, event.end, isAssinatura, hasCoupon)
                   )}
                   {numberOfLines > 3 ? (
                     this._renderEventBiggerThreeLines(event, numberOfLines, titleFontSize, obsFontSize, isAgendamento)

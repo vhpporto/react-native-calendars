@@ -302,7 +302,7 @@ export default class Timeline extends React.PureComponent {
     this.props.abrirDetalhesAgendamento(JSON.stringify(event))
   }
 
-  horaAgendamento(inicio, fim, isAssinatura, hasCoupon) {
+  horaAgendamento(inicio, fim, isAssinatura, hasCoupon, isSilenceChat) {
     const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
     return (
       <>
@@ -310,6 +310,7 @@ export default class Timeline extends React.PureComponent {
           <Text style={[this.style.eventTimes, this.style.bold]}>
             {isAssinatura ? <FontAwesome  name='star' color='orange' /> : null}
             {hasCoupon ? <FontAwesome  name='tag' color='green' /> : null}{' '}
+            {isSilenceChat ? <FontAwesome  name='microphone-slash' color={'red'} /> : null}{' '}
             {XDate(inicio).toString(formatTime)} - {XDate(fim).toString(formatTime)}{' '}
           </Text>
         </Text>
@@ -389,6 +390,7 @@ export default class Timeline extends React.PureComponent {
 
       const numberOfLines = Math.abs(Math.floor(event.height / TEXT_LINE_HEIGHT));
       const isAssinatura = event.assinatura && event.assinatura !== '';
+      const isSilenceChat = event?.AOp_Sem_Chat === "1";
       const hasCoupon = event.cupom && event.cupom !== '';
       const obsFontSize = numberOfLines <= 3 ? 10 : 11
       const titleFontSize = numberOfLines <= 3 ? 12 : 14
@@ -411,7 +413,7 @@ export default class Timeline extends React.PureComponent {
               ) : (
                 <>
                   {isAgendamento && (
-                    this.horaAgendamento(event.start, event.end, isAssinatura, hasCoupon)
+                    this.horaAgendamento(event.start, event.end, isAssinatura, hasCoupon, isSilenceChat)
                   )}
                   {numberOfLines > 3 ? (
                     this._renderEventBiggerThreeLines(event, numberOfLines, titleFontSize, obsFontSize, isAgendamento)

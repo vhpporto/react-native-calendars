@@ -302,13 +302,43 @@ export default class Timeline extends React.PureComponent {
     this.props.abrirDetalhesAgendamento(JSON.stringify(event))
   }
 
-  horaAgendamento(inicio, fim, isAssinatura, hasCoupon, isSilenceChat) {
+  horaAgendamento(inicio, fim, isAssinatura, inadimplenteAss, isAssinaturaMultiunidade, inadimplenteMulti, hasCoupon, isSilenceChat) {
     const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
     return (
       <>
         <Text style={[this.style.eventTitle]}>
           <Text style={[this.style.eventTimes, this.style.bold]}>
-            {isAssinatura ? <FontAwesome  name='star' color='orange' /> : null}
+          
+            {isAssinatura ? (
+                <View style={{  borderRadius: 10 ,padding: 2, backgroundColor: 'orange'}}>
+
+                <FontAwesome  name='star' color='#fff' />
+    
+                </View>
+            ) : null}
+            {inadimplenteAss ? (
+                <View style={{  borderRadius: 10 ,padding: 2, backgroundColor: 'red'}}>
+
+                <FontAwesome  name='star' color='#fff' />
+    
+                </View>
+            ) : null}
+            {isAssinaturaMultiunidade ? (
+                <View style={{  borderRadius: 10 ,padding: 2, backgroundColor: 'yellow'}}>
+
+                <FontAwesome  name='star' color='#000' />
+    
+                </View>
+            ) : null}
+
+            {inadimplenteMulti ? (
+                <View style={{  borderRadius: 10 ,padding: 2, backgroundColor: 'red'}}>
+
+                <FontAwesome  name='star' color='#000' />
+    
+                </View>
+            ) : null}
+            
             {hasCoupon ? <FontAwesome  name='tag' color='green' /> : null}{' '}
             {isSilenceChat ? <FontAwesome  name='microphone-slash' color={'red'} /> : null}{' '}
             {XDate(inicio).toString(formatTime)} - {XDate(fim).toString(formatTime)}{' '}
@@ -331,7 +361,7 @@ export default class Timeline extends React.PureComponent {
     return this.horaAgendamento(event.start, event.end)
   }
 
-  _renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, isAgendamento, hasCoupon) {
+  _renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, inadimplenteAss, isAssinaturaMultiunidade, inadimplenteMulti, isAgendamento, hasCoupon, isSilenceChat) {
     if (!isAgendamento) {
       return (
         <Text numberOfLines={numberOfLines} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>
@@ -341,7 +371,7 @@ export default class Timeline extends React.PureComponent {
     }
     return (
       <Text numberOfLines={numberOfLines} style={[this.style.eventTitle, { fontSize: titleFontSize }]}>
-        {this.horaAgendamento(event.start, event.end, isAssinatura, hasCoupon)}
+        {this.horaAgendamento(event.start, event.end, isAssinatura, inadimplenteAss, isAssinaturaMultiunidade, inadimplenteMulti, hasCoupon, isSilenceChat)}
         {' '}{event.servico || ''} - {event.usuario}  <Text numberOfLines={numberOfLines} style={[this.style.eventSummary, { fontSize: obsFontSize }]}>
           {event.obs || ''}
         </Text>
@@ -390,6 +420,9 @@ export default class Timeline extends React.PureComponent {
 
       const numberOfLines = Math.abs(Math.floor(event.height / TEXT_LINE_HEIGHT));
       const isAssinatura = event.assinatura && event.assinatura !== '';
+      const inadimplenteAss = event.inadimplente_assinatura && event.inadimplente_assinatura === '1'
+      const isAssinaturaMultiunidade = event.ass_multiunidade && event.ass_multiunidade !== '';
+      const inadimplenteMulti = event.inadimplente_assinatura_multi && event.inadimplente_assinatura_multi === '1';
       const isSilenceChat = event?.AOp_Sem_Chat === "1";
       const hasCoupon = event.cupom && event.cupom !== '';
       const obsFontSize = numberOfLines <= 3 ? 10 : 11
@@ -409,11 +442,11 @@ export default class Timeline extends React.PureComponent {
               {isSemJornada ? this._renderSemJornada(event) : null}
 
               {numberOfLines <= 2 ? (
-                this._renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, isAgendamento, hasCoupon)
+                this._renderEventUntillTwoLines(event, numberOfLines, titleFontSize, obsFontSize, isAssinatura, inadimplenteAss, isAssinaturaMultiunidade, inadimplenteMulti, isAgendamento, hasCoupon, isSilenceChat)
               ) : (
                 <>
                   {isAgendamento && (
-                    this.horaAgendamento(event.start, event.end, isAssinatura, hasCoupon, isSilenceChat)
+                    this.horaAgendamento(event.start, event.end, isAssinatura, inadimplenteAss, isAssinaturaMultiunidade, inadimplenteMulti, hasCoupon, isSilenceChat)
                   )}
                   {numberOfLines > 3 ? (
                     this._renderEventBiggerThreeLines(event, numberOfLines, titleFontSize, obsFontSize, isAgendamento)

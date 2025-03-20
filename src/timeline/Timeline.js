@@ -250,6 +250,10 @@ export default class Timeline extends React.PureComponent {
         onPress: () => this.props.atualizaComanda(event.Com_Codigo, event.CIt_Codigo)
       },
       {
+        text: 'Mensagem de agradecimento',
+        onPress: () => this.props.buscaMensagemAgradecimento(event)
+      },
+      {
         text: 'Prontuário',
         onPress: () => this.props.irParaProntuario(event)
       },

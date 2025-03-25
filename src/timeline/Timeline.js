@@ -191,7 +191,7 @@ export default class Timeline extends React.PureComponent {
     }
 
     let QUANTIDADE_SLOTS = Math.ceil(HORA_CHEIA_EM_MINUTOS / param)
-    const TAMANHO_SLOT_HORA = this.calendarHeight / 24 / (60 / param)
+    const TAMANHO_SLOT_HORA = this.calendarHeight / (24 - start) / (60 / param)
     const EVENT_DIFF = 20;
     const offset = this.calendarHeight / (end - start);
 

@@ -467,8 +467,8 @@ export default class Timeline extends React.PureComponent {
           false,
           false,
           false,
-          '0',
-          '0',
+          false,
+          false,
         )}
         Agenda bloqueada
       </Text>
@@ -485,8 +485,8 @@ export default class Timeline extends React.PureComponent {
       false,
       false,
       false,
-      '0',
-      '0',
+      false,
+      false,
     );
   }
 

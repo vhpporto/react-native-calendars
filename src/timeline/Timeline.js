@@ -6,6 +6,7 @@ import React from 'react';
 import {
   Alert,
   Dimensions,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -288,24 +289,77 @@ export default class Timeline extends React.PureComponent {
   }
 
   renderAlertProntuario(title, subtitle, event) {
-    return Alert.alert(title, subtitle, [
+    const showPhoneAndEmail = this.props.isGestor() || this.props.verificaParametroTelefoneCliente();
+    
+    // Android tem limite de 3 botões no Alert, então dividimos em dois alerts
+    if (Platform.OS === 'android') {
+      return Alert.alert(title, subtitle, [
+        {
+          text: 'Reabrir agendamento',
+          onPress: () =>
+            this.props.atualizaComanda(event.Com_Codigo, event.CIt_Codigo),
+        },
+        {
+          text: 'Mais opções',
+          onPress: () => this.showSecondaryOptions(event),
+        },
+        {
+          text: 'Voltar',
+        },
+      ]);
+    }
+    
+    // iOS pode ter mais de 3 botões
+    const buttons = [
       {
         text: 'Reabrir agendamento',
         onPress: () =>
           this.props.atualizaComanda(event.Com_Codigo, event.CIt_Codigo),
       },
-      {
+    ];
+
+    if (showPhoneAndEmail) {
+      buttons.push({
         text: 'Mensagem de agradecimento',
         onPress: () => this.props.buscaMensagemAgradecimento(event),
-      },
+      });
+    }
+
+    buttons.push(
       {
         text: 'Prontuário',
         onPress: () => this.props.irParaProntuario(event),
       },
       {
         text: 'Voltar',
+      }
+    );
+
+    return Alert.alert(title, subtitle, buttons);
+  }
+  
+  showSecondaryOptions(event) {
+    const showPhoneAndEmail = this.props.isGestor() || this.props.verificaParametroTelefoneCliente();
+    
+    const buttons = [
+      {
+        text: 'Prontuário',
+        onPress: () => this.props.irParaProntuario(event),
       },
-    ]);
+    ];
+
+    if (showPhoneAndEmail) {
+      buttons.push({
+        text: 'Mensagem de agradecimento',
+        onPress: () => this.props.buscaMensagemAgradecimento(event),
+      });
+    }
+
+    buttons.push({
+      text: 'Voltar',
+    });
+
+    return Alert.alert('Mais opções', 'Escolha uma opção', buttons);
   }
 
   renderAlert(title, subtitle, id) {

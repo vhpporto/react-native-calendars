@@ -276,16 +276,40 @@ export default class Timeline extends React.PureComponent {
     });
   }
 
-  renderAlertAusente(title, subtitle, id, citCodigo) {
-    return Alert.alert(title, subtitle, [
+  renderAlertAusente(title, subtitle, id, citCodigo, event) {
+    // Android tem limite de 3 botões no Alert, então dividimos em dois alerts
+    if (Platform.OS === 'android') {
+      return Alert.alert(title, subtitle, [
+        {
+          text: 'Reabrir agendamento',
+          onPress: () => this.props.atualizaComanda(id, citCodigo),
+        },
+        {
+          text: 'Mais opções',
+          onPress: () => this.showSecondaryOptionsAusente(event),
+        },
+        {
+          text: 'Voltar',
+        },
+      ]);
+    }
+    
+    // iOS pode ter mais de 3 botões
+    const buttons = [
       {
-        text: 'Não',
-      },
-      {
-        text: 'Sim',
+        text: 'Reabrir agendamento',
         onPress: () => this.props.atualizaComanda(id, citCodigo),
       },
-    ]);
+      {
+        text: 'Enviar Recibo',
+        onPress: () => this.props.enviarRecibo && this.props.enviarRecibo(event),
+      },
+      {
+        text: 'Voltar',
+      }
+    ];
+
+    return Alert.alert(title, subtitle, buttons);
   }
 
   renderAlertProntuario(title, subtitle, event) {
@@ -327,6 +351,10 @@ export default class Timeline extends React.PureComponent {
 
     buttons.push(
       {
+        text: 'Enviar Recibo',
+        onPress: () => this.props.enviarRecibo && this.props.enviarRecibo(event),
+      },
+      {
         text: 'Prontuário',
         onPress: () => this.props.irParaProntuario(event),
       },
@@ -343,6 +371,10 @@ export default class Timeline extends React.PureComponent {
     
     const buttons = [
       {
+        text: 'Enviar Recibo',
+        onPress: () => this.props.enviarRecibo && this.props.enviarRecibo(event),
+      },
+      {
         text: 'Prontuário',
         onPress: () => this.props.irParaProntuario(event),
       },
@@ -358,6 +390,20 @@ export default class Timeline extends React.PureComponent {
     buttons.push({
       text: 'Voltar',
     });
+
+    return Alert.alert('Mais opções', 'Escolha uma opção', buttons);
+  }
+  
+  showSecondaryOptionsAusente(event) {
+    const buttons = [
+      {
+        text: 'Enviar Recibo',
+        onPress: () => this.props.enviarRecibo && this.props.enviarRecibo(event),
+      },
+      {
+        text: 'Voltar',
+      },
+    ];
 
     return Alert.alert('Mais opções', 'Escolha uma opção', buttons);
   }
@@ -382,9 +428,10 @@ export default class Timeline extends React.PureComponent {
     ) {
       return this.renderAlertAusente(
         'Comanda finalizada',
-        'Deseja reabrir este agendamento ?',
+        'Escolha uma opção',
         event.Com_Codigo,
         event.CIt_Codigo,
+        event,
       );
     }
     if (event.status === 'Realizado') {
